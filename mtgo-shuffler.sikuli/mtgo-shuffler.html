@@ -1,0 +1,314 @@
+
+<html>
+   <head>
+      <style type="text/css">
+         .sikuli-code {
+            font-size: 20px;
+            font-family: "Osaka-mono", Monospace;
+            line-height: 1.5em;
+            display:table-cell;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+         }
+         .sikuli-code img {
+            vertical-align: middle;
+            margin: 2px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 1px 1px 1px gray;
+            -webkit-box-shadow: 1px 1px 2px gray;
+         }
+         .kw {
+            color: blue;
+         }
+         .skw {
+            color: rgb(63, 127, 127);
+         }
+
+         .str {
+            color: rgb(128, 0, 0);
+         }
+
+         .dig {
+            color: rgb(128, 64, 0);
+         }
+
+         .cmt {
+            color: rgb(200, 0, 200);
+         }
+
+         h2 {
+            display: inline;
+            font-weight: normal;
+         }  
+         
+         .info {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: none;
+         }
+
+         a {
+            color: #9D2900;
+         }
+
+         body {
+            font-family: "Trebuchet MS", Arial, Sans-Serif;
+         }
+
+      </style>
+   </head>
+<body>
+<div class="info">
+<h2>mtgo-automator.sikuli\mtgo-automator.sikuli</h2> <a href="mtgo-automator.sikuli\mtgo-automator.zip">(Download this script)</a>
+</div>
+<pre class="sikuli-code">
+<span class="kw">import</span> pickle
+<span class="kw">import</span> time
+<span class="kw">import</span> guide
+<span class="kw">import</span> java.awt.Toolkit
+
+REGION_CARDS = Region(<span class="dig">219</span>,<span class="dig">681</span>,<span class="dig">649</span>,<span class="dig">51</span>)
+REGION_RIGHT_CLICK = Region(<span class="dig">284</span>,<span class="dig">28</span>,<span class="dig">305</span>,<span class="dig">246</span>)
+REGION_CONCEDE_GAME2 = Region(<span class="dig">529</span>,<span class="dig">448</span>,<span class="dig">109</span>,<span class="dig">37</span>)
+REGION_OK = Region(<span class="dig">583</span>,<span class="dig">449</span>,<span class="dig">113</span>,<span class="dig">35</span>)
+REGION_SUBMIT = Region(<span class="dig">357</span>,<span class="dig">29</span>,<span class="dig">73</span>,<span class="dig">32</span>)
+REGION_YES_NO = Region(<span class="dig">8</span>,<span class="dig">375</span>,<span class="dig">105</span>,<span class="dig">38</span>)
+REGION_CONCEDE_MATCH2 = Region(<span class="dig">534</span>,<span class="dig">449</span>,<span class="dig">101</span>,<span class="dig">30</span>)
+REGION_NEW_GAME = Region(<span class="dig">684</span>,<span class="dig">0</span>,<span class="dig">117</span>,<span class="dig">30</span>)
+REGION_SELECT_DECK = Region(<span class="dig">583</span>,<span class="dig">369</span>,<span class="dig">114</span>,<span class="dig">14</span>)
+REGION_NEW_GAME_OPTIONS = Region(<span class="dig">360</span>,<span class="dig">183</span>,<span class="dig">563</span>,<span class="dig">394</span>)
+REGION_NEW_GAME_OPTIONS_OK = Region(<span class="dig">591</span>,<span class="dig">526</span>,<span class="dig">98</span>,<span class="dig">16</span>)
+
+PATTERN_FOREST = Pattern(<img src="1309403746146.png" />).similar(<span class="dig">0.90</span>)
+PATTERN_MOUNTAIN = Pattern(<img src="1309403798497.png" />).similar(<span class="dig">0.90</span>)
+PATTERN_CONCEDE_GAME1 = Pattern(<img src="1309404343655.png" />).similar(<span class="dig">0.95</span>)
+PATTERN_CONCEDE_GAME2 = Pattern(<img src="CDNCEDEGAME.png" />).similar(<span class="dig">0.95</span>)
+PATTERN_OK = Pattern(<img src="113.png" />).similar(<span class="dig">0.95</span>)
+PATTERN_SUBMIT = Pattern(<img src="Lil1III.png" />).similar(<span class="dig">0.95</span>)
+PATTERN_YES_NO = Pattern(<img src="NDflif.png" />).similar(<span class="dig">0.95</span>)
+PATTERN_CONCEDE_MATCH1 = <img src="1309443165553.png" />
+PATTERN_CONCEDE_MATCH2 = <img src="1309443262881.png" />
+PATTERN_NEW_GAME = <img src="1309443466101.png" />
+PATTERN_NEW_GAME_OPTIONS = <img src="1309443556970.png" />
+PATTERN_CORRECT_DECK = Pattern(<img src="1309443688027.png" />).similar(<span class="dig">0.90</span>)
+
+PATH_BASE = <span class="str">r"C:\Users\Andrew\Documents\My Dropbox\src\MTGO shuffler\\"</span>
+WAIT_TIME = <span class="dig">30</span>  <span class="cmt"># seconds</span>
+
+<span class="kw">def</span> beep(times=<span class="dig">1</span>):
+        <span class="kw">for</span> x <span class="kw">in</span> range(times):
+                java.awt.Toolkit.getDefaultToolkit().beep()
+                time.<span class="skw">sleep</span>(<span class="dig">0.3</span>)
+
+<span class="kw">def</span> log(message, log=<span class="str">"log.txt"</span>):
+        <span class="kw">with</span> open(PATH_BASE + log, <span class="str">"a+"</span>) <span class="kw">as</span> logFile:
+                <span class="kw">for</span> file <span class="kw">in</span> [sys.stdout, logFile]:
+                        file.write(message)
+
+<span class="kw">def</span> findAllLands(totalHands):
+        forests = []
+        mountains = []
+
+        <span class="kw">if</span> REGION_CARDS.exists(PATTERN_FOREST):
+                forests = list(REGION_CARDS.findAll(PATTERN_FOREST))
+
+        <span class="kw">if</span> REGION_CARDS.exists(PATTERN_MOUNTAIN):
+                mountains = list(REGION_CARDS.findAll(PATTERN_MOUNTAIN))
+
+        lands = forests + mountains
+
+
+        <span class="str">"""
+        for land in lands:
+                guide.rectangle(land)
+
+        guide.text(Region(500,551,72,23), str(totalHands))
+
+        guide.show(1)
+        """</span>
+
+
+
+        <span class="kw">return</span> len(lands)
+
+<span class="kw">def</span> startMTGO():
+        PATTERN_MTGO2 = <img src="1309445185772.png" />
+        PATTERN_MAXIMIZE = Pattern(<img src="1309445217736.png" />).similar(<span class="dig">0.95</span>)
+        PATTERN_FREE_TRIAL = <img src="1309445250255.png" />
+        REGION_PLAY = Region(<span class="dig">66</span>,<span class="dig">160</span>,<span class="dig">120</span>,<span class="dig">64</span>)
+        PATTERN_PLAY = <img src="1309445874954.png" />
+        REGION_PLAY_STRUCTURE = Region(<span class="dig">605</span>,<span class="dig">294</span>,<span class="dig">64</span>,<span class="dig">23</span>)
+        PATTERN_SOLITAIRE = Pattern(<img src="1309445377671.png" />).similar(<span class="dig">0.90</span>)
+        REGION_MATCH_STRUCTURE = Region(<span class="dig">592</span>,<span class="dig">323</span>,<span class="dig">87</span>,<span class="dig">12</span>)
+        PATTERN_BEST_OF = Pattern(<img src="1309445743921.png" />).similar(<span class="dig">0.90</span>)
+        REGION_DECK = Region(<span class="dig">585</span>,<span class="dig">371</span>,<span class="dig">101</span>,<span class="dig">12</span>)
+        PATTERN_ALLOW_WATCHERS = <img src="1309447788927.png" />
+        REGION_CASUAL_GAMES = Region(<span class="dig">6</span>,<span class="dig">21</span>,<span class="dig">138</span>,<span class="dig">31</span>)
+        PATTERN_CASUAL_GAMES_ZERO = Pattern(<img src="1309555276543.png" />).similar(<span class="dig">0.98</span>)
+
+        <span class="skw">click</span>(Pattern(<img src="1309481763452.png" />).similar(<span class="dig">0.91</span>))
+
+        <span class="skw">wait</span>(PATTERN_MTGO2, WAIT_TIME * <span class="dig">2</span>)
+        <span class="skw">click</span>(PATTERN_MAXIMIZE)
+        time.<span class="skw">sleep</span>(<span class="dig">1</span>)
+        <span class="skw">click</span>(PATTERN_FREE_TRIAL)
+
+        REGION_PLAY.<span class="skw">wait</span>(PATTERN_PLAY, WAIT_TIME)
+        <span class="skw">click</span>(REGION_PLAY)
+
+        <span class="skw">wait</span>(PATTERN_NEW_GAME_OPTIONS, WAIT_TIME)
+
+        <span class="skw">click</span>(REGION_PLAY_STRUCTURE)
+        time.<span class="skw">sleep</span>(<span class="dig">0.5</span>)
+        <span class="skw">wait</span>(PATTERN_SOLITAIRE)
+        <span class="skw">click</span>(PATTERN_SOLITAIRE)
+
+        time.<span class="skw">sleep</span>(<span class="dig">0.5</span>)
+        <span class="skw">click</span>(REGION_MATCH_STRUCTURE)
+        time.<span class="skw">sleep</span>(<span class="dig">0.5</span>)
+        <span class="skw">wait</span>(PATTERN_BEST_OF)
+        <span class="skw">click</span>(PATTERN_BEST_OF)
+
+        <span class="cmt"># Wait for the list of games to load so the deck is responsive.
+</span>        REGION_CASUAL_GAMES.waitVanish(PATTERN_CASUAL_GAMES_ZERO, <span class="dig">60</span>)
+        beep(<span class="dig">1</span>)
+        time.<span class="skw">sleep</span>(<span class="dig">3</span>)
+        <span class="skw">click</span>(REGION_DECK)
+        time.<span class="skw">sleep</span>(<span class="dig">1</span>)
+        <span class="kw">if</span> <span class="kw">not</span> exists(PATTERN_CORRECT_DECK):
+                <span class="skw">click</span>(REGION_DECK)
+
+        time.<span class="skw">sleep</span>(<span class="dig">1</span>)
+        <span class="skw">wait</span>(PATTERN_CORRECT_DECK)
+        <span class="skw">click</span>(PATTERN_CORRECT_DECK)
+
+        time.<span class="skw">sleep</span>(<span class="dig">1</span>)
+        <span class="kw">if</span> exists(PATTERN_ALLOW_WATCHERS):
+                <span class="skw">click</span>(PATTERN_ALLOW_WATCHERS)
+
+        time.<span class="skw">sleep</span>(<span class="dig">0.5</span>)
+        <span class="skw">click</span>(REGION_NEW_GAME_OPTIONS_OK)
+
+        REGION_YES_NO.<span class="skw">wait</span>(PATTERN_YES_NO, WAIT_TIME * <span class="dig">4</span>)
+
+<span class="kw">def</span> quitMTGO():
+        beep(<span class="dig">3</span>)
+
+        time.<span class="skw">sleep</span>(<span class="dig">3</span>)
+        closeApp(<span class="str">"Magic Online"</span>)
+        time.<span class="skw">sleep</span>(<span class="dig">5</span>)
+
+<span class="kw">def</span> nextGame():
+        beep()
+
+        time.<span class="skw">sleep</span>(<span class="dig">0.5</span>)
+        <span class="skw">rightClick</span>(REGION_RIGHT_CLICK)
+
+        REGION_RIGHT_CLICK.<span class="skw">wait</span>(PATTERN_CONCEDE_GAME1, WAIT_TIME)
+        REGION_RIGHT_CLICK.<span class="skw">click</span>(PATTERN_CONCEDE_GAME1)
+
+        REGION_CONCEDE_GAME2.<span class="skw">wait</span>(PATTERN_CONCEDE_GAME2, WAIT_TIME)
+        <span class="skw">click</span>(REGION_CONCEDE_GAME2)
+
+        REGION_OK.<span class="skw">wait</span>(PATTERN_OK, WAIT_TIME)
+        time.<span class="skw">sleep</span>(<span class="dig">0.5</span>)
+        <span class="skw">click</span>(REGION_OK)
+
+        REGION_SUBMIT.<span class="skw">wait</span>(PATTERN_SUBMIT, WAIT_TIME)
+        time.<span class="skw">sleep</span>(<span class="dig">0.5</span>)
+        <span class="skw">click</span>(REGION_SUBMIT)
+
+        REGION_YES_NO.<span class="skw">wait</span>(PATTERN_YES_NO, WAIT_TIME)
+
+<span class="kw">def</span> captureHand(results, totalHands):
+        numLands = findAllLands(totalHands)
+        results[numLands] = results.setdefault(numLands, <span class="dig">0</span>) + <span class="dig">1</span>
+
+<span class="kw">def</span> logResults(results):
+        totalHands = sum(results.itervalues())
+        percentageResults = results.copy()
+        resultsStr = <span class="str">""</span>
+        <span class="kw">for</span> numLands <span class="kw">in</span> sorted(results.keys()):
+                percentageResults[numLands] = <span class="str">"%.2f%%"</span> % ((<span class="dig">100.0</span> * results[numLands]) / totalHands,)
+                resultsStr += <span class="str">"%d lands: %s (%d)\n"</span> % (numLands, percentageResults[numLands], results[numLands])
+
+        message = str(results)
+        message += <span class="str">"\nTotal hands: %d\n%s"</span> % (totalHands, resultsStr)
+        message += <span class="str">"-\n"</span>
+
+        log(message, log=<span class="str">"results.txt"</span>)
+
+<span class="kw">def</span> pickleResults(results, filename):
+        <span class="kw">with</span> open(PATH_BASE + filename, <span class="str">"wb"</span>) <span class="kw">as</span> file:
+                pickle.dump((results, sum(results.itervalues())), file)
+
+<span class="kw">def</span> unpickleResults(filename):
+        <span class="kw">try</span>:
+                file = open(PATH_BASE + filename, <span class="str">"rb"</span>)
+                results, totalHands = pickle.load(file)
+                file.close()
+
+                <span class="kw">assert</span> sum(results.itervalues()) == totalHands
+
+                <span class="kw">return</span> results, totalHands
+        <span class="kw">except</span> IOError:
+                file = open(PATH_BASE + filename, <span class="str">"wb"</span>)
+                file.write(<span class="str">""</span>)
+                file.close()
+
+                <span class="kw">return</span> {}, <span class="dig">0</span>
+
+<span class="kw">def</span> main():
+        Settings.MoveMouseDelay = <span class="dig">0.4</span>
+        Settings.WaitScanRate = <span class="dig">10</span>
+
+        pickleFilename = <span class="str">"results.pickle"</span>
+
+        results, totalHands = unpickleResults(pickleFilename)
+
+        log(<span class="str">"Unpickled (%s, %d)\n"</span> % (str(results), totalHands))
+
+        <span class="kw">while</span> True:
+                <span class="kw">try</span>:
+                        <span class="kw">if</span> <span class="kw">not</span> REGION_YES_NO.exists(PATTERN_YES_NO):
+                                startMTGO()
+
+                        totalHands = sum(results.itervalues())
+
+                        captureHand(results, totalHands)
+                        nextGame()
+
+                        <span class="kw">if</span> totalHands % <span class="dig">5</span> == <span class="dig">4</span>:
+                                logResults(results)
+
+                        <span class="kw">if</span> totalHands % <span class="dig">50</span> == <span class="dig">0</span>:
+                                quitMTGO()
+                                startMTGO()
+
+                <span class="kw">except</span> FindFailed:
+                        beep(<span class="dig">6</span>)
+                        quitMTGO()
+
+                <span class="kw">except</span> KeyboardInterrupt, ThreadDeath:
+                        <span class="kw">raise</span>
+
+                <span class="kw">except</span>:
+                        beep(<span class="dig">15</span>)
+                        <span class="kw">raise</span>
+
+                <span class="kw">finally</span>:
+                        pickleResults(results, pickleFilename)
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+        main()
+</pre>
+</body>
+</html>
